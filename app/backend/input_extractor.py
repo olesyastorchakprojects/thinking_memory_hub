@@ -48,7 +48,9 @@ class StructuredInputExtractor:
             update_note_prompt_path or (base / "backend_update_note_input_extractor.prompt.json")
         )
 
-    async def extract_save_input(self, user_message: str) -> NoteCreateRequest:
+    async def extract_save_input(
+        self, user_message: str, *, trace_id: str | None = None
+    ) -> NoteCreateRequest:
         if not user_message.strip():
             raise InputExtractionError("user message must be non-empty")
 
@@ -70,7 +72,7 @@ class StructuredInputExtractor:
             max_output_tokens=1000,
             response_schema=SaveExtractionResult.model_json_schema(),
         )
-        payload = await self._generate_payload(request, "save extractor")
+        payload = await self._generate_payload(request, "save extractor", trace_id=trace_id)
         try:
             extracted = SaveExtractionResult.model_validate(payload)
         except Exception as exc:
@@ -88,7 +90,9 @@ class StructuredInputExtractor:
         except Exception as exc:
             raise InputExtractionError("save extractor payload cannot build NoteCreateRequest") from exc
 
-    async def extract_search_notes_input(self, user_message: str) -> NoteSearchRequest:
+    async def extract_search_notes_input(
+        self, user_message: str, *, trace_id: str | None = None
+    ) -> NoteSearchRequest:
         if not user_message.strip():
             raise InputExtractionError("user message must be non-empty")
 
@@ -109,14 +113,18 @@ class StructuredInputExtractor:
             max_output_tokens=1000,
             response_schema=NoteSearchRequest.model_json_schema(by_alias=True),
         )
-        payload = await self._generate_payload(request, "search-notes extractor")
+        payload = await self._generate_payload(
+            request, "search-notes extractor", trace_id=trace_id
+        )
         try:
             extracted = NoteSearchRequest.model_validate(payload)
         except Exception as exc:
             raise InputExtractionError("search-notes extractor returned invalid payload") from exc
         return self._apply_relative_time_range(user_message, extracted)
 
-    async def extract_search_tags_input(self, user_message: str) -> TagSearchRequest:
+    async def extract_search_tags_input(
+        self, user_message: str, *, trace_id: str | None = None
+    ) -> TagSearchRequest:
         if not user_message.strip():
             raise InputExtractionError("user message must be non-empty")
 
@@ -137,14 +145,18 @@ class StructuredInputExtractor:
             max_output_tokens=1000,
             response_schema=TagSearchRequest.model_json_schema(by_alias=True),
         )
-        payload = await self._generate_payload(request, "search-tags extractor")
+        payload = await self._generate_payload(
+            request, "search-tags extractor", trace_id=trace_id
+        )
         try:
             extracted = TagSearchRequest.model_validate(payload)
         except Exception as exc:
             raise InputExtractionError("search-tags extractor returned invalid payload") from exc
         return self._apply_relative_tag_time_range(user_message, extracted)
 
-    async def extract_update_note_input(self, user_message: str) -> UpdateExtractionResult:
+    async def extract_update_note_input(
+        self, user_message: str, *, trace_id: str | None = None
+    ) -> UpdateExtractionResult:
         if not user_message.strip():
             raise InputExtractionError("user message must be non-empty")
 
@@ -165,16 +177,26 @@ class StructuredInputExtractor:
             max_output_tokens=1000,
             response_schema=UpdateExtractionResult.model_json_schema(),
         )
-        payload = await self._generate_payload(request, "update-note extractor")
+        payload = await self._generate_payload(
+            request, "update-note extractor", trace_id=trace_id
+        )
         try:
             return UpdateExtractionResult.model_validate(payload)
         except Exception as exc:
             raise InputExtractionError("update-note extractor returned invalid payload") from exc
 
-    async def _generate_payload(self, request: ModelGenerationRequest, label: str) -> dict:
+    async def _generate_payload(
+        self,
+        request: ModelGenerationRequest,
+        label: str,
+        *,
+        trace_id: str | None = None,
+    ) -> dict:
         last_error: InputExtractionError | None = None
         for _ in range(self._MAX_RETRIES):
-            response = await self._model_client.generate(request)
+            response = await self._model_client.generate(
+                request, trace_id=trace_id, span_name=label
+            )
             try:
                 return self._parse_json_payload(response.content, label)
             except InputExtractionError as exc:
