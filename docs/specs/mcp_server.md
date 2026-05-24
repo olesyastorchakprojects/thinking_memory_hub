@@ -23,9 +23,9 @@ This document is the source of truth for:
 
 This document uses:
 
-- `Specification/data_contracts.md`
-- `Specification/storage_client_interface.md`
-- `Specification/mcp_tool_definitions.md`
+- `docs/specs/data_contracts.md`
+- `docs/specs/storage_client_interface.md`
+- `docs/specs/mcp_tool_definitions.md`
 
 ## 2. Runtime Stack
 
@@ -73,7 +73,7 @@ tests/
 
 ### 4.1 `app/memory_server/models.py`
 
-This module must define Pydantic models for all server-used contracts from `Specification/data_contracts.md`.
+This module must define Pydantic models for all server-used contracts from `docs/specs/data_contracts.md`.
 
 This module must define exactly these public names:
 
@@ -100,7 +100,7 @@ This module must define exactly these public names:
 
 Rules:
 
-- every public model must be derived directly from the corresponding contract in `Specification/data_contracts.md`
+- every public model must be derived directly from the corresponding contract in `docs/specs/data_contracts.md`
 - `NoteUpdateOperation` must be a tagged union over:
   - `SetNoteKindOperation`
   - `SetNormalizedTextOperation`
@@ -192,7 +192,7 @@ class StorageClient:
 
 Rules:
 
-- this module must implement the interface defined in `Specification/storage_client_interface.md`
+- this module must implement the interface defined in `docs/specs/storage_client_interface.md`
 - this module owns PostgreSQL access
 - this module owns SQL execution and transactions
 - this module must use an async PostgreSQL connection pool
@@ -266,7 +266,7 @@ Rules:
   - `notes.search`
   - `notes.update`
   - `tags.search`
-- tool metadata must come from `Specification/mcp_tool_definitions.md`
+- tool metadata must come from `docs/specs/mcp_tool_definitions.md`
 - registered tool handlers must be:
   - `handle_notes_save`
   - `handle_notes_search`
@@ -282,9 +282,9 @@ Rules:
   - `handle_notes_search`
   - `handle_notes_update`
   - `handle_tags_search`
-- the published FastMCP tool argument schema must be semantically equivalent to the corresponding `inputSchema` in `Specification/mcp_tool_definitions.md`
-- item-level constraints from `Specification/mcp_tool_definitions.md` must be preserved in wrapper parameter typing
-- nested object constraints from `Specification/mcp_tool_definitions.md` must be preserved in wrapper parameter typing
+- the published FastMCP tool argument schema must be semantically equivalent to the corresponding `inputSchema` in `docs/specs/mcp_tool_definitions.md`
+- item-level constraints from `docs/specs/mcp_tool_definitions.md` must be preserved in wrapper parameter typing
+- nested object constraints from `docs/specs/mcp_tool_definitions.md` must be preserved in wrapper parameter typing
 - internal handlers remain the source of truth for:
   - input validation
   - typed request construction
@@ -480,7 +480,7 @@ This file must test:
 - `notes.search` returns persisted note data through the MCP tool boundary
 - `notes.update` applies updates through the MCP tool boundary
 - `tags.search` returns aggregated tag results through the MCP tool boundary
-- published tool invocation succeeds with payloads satisfying `Specification/mcp_tool_definitions.md`
+- published tool invocation succeeds with payloads satisfying `docs/specs/mcp_tool_definitions.md`
 
 Rules:
 
