@@ -10,7 +10,7 @@ This document is the source of truth for:
 
 This document uses:
 
-- `Specification/data_contracts.md`
+- `docs/specs/data_contracts.md`
 - `db/schema.sql`
 
 ## 2. Ownership Boundary
