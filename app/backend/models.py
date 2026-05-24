@@ -108,6 +108,8 @@ class ModelGenerationResponse(BaseModel):
     prompt_tokens: int | None = None
     completion_tokens: int | None = None
     total_tokens: int | None = None
+    input_cost: float | None = None
+    output_cost: float | None = None
 
 
 class IntentClassificationResult(BaseModel):

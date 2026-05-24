@@ -29,7 +29,9 @@ class IntentClassifier:
         )
         self._prompt_spec = self._load_prompt_spec(self._prompt_path)
 
-    async def classify(self, user_message: str) -> IntentClassificationResult:
+    async def classify(
+        self, user_message: str, *, trace_id: str | None = None
+    ) -> IntentClassificationResult:
         if not user_message.strip():
             raise IntentParseError("user message must be non-empty")
 
@@ -50,7 +52,9 @@ class IntentClassifier:
             max_output_tokens=1000,
             response_schema=self._prompt_spec["response_schema"],
         )
-        response = await self._model_client.generate(request)
+        response = await self._model_client.generate(
+            request, trace_id=trace_id, span_name="intent_classifier"
+        )
         try:
             payload = json.loads(response.content)
         except json.JSONDecodeError as exc:
